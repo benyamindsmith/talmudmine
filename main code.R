@@ -71,7 +71,14 @@ tlmdMtab<-sort(tlmdMtab, decreasing = TRUE)
 #'Too much trouble with encoding via data frames. Best to use tibble
 tlmdMtab<-as.tibble(tlmdMtab)
 
-ggplot(data=tlmdMtab,
-       aes(x=tlmdM,
+ #'Clean
+              
+ tlmdMtab<-tlmdMtab[2:741,]
+#'Reduce size, get top 50
+
+st<-tlmdMtab[1:50,]
+
+ggplot(st,
+       aes(x=n,
            fill=tlmdM))+
-  geom_bar(position="dodge")
+  geom_bar()
