@@ -80,8 +80,25 @@ links<-list(PerekAleph=c("https://www.sefaria.org/Mishnah_Berakhot.1.1?lang=he&w
                     "https://www.sefaria.org/Mishnah_Berakhot.9.4?lang=he&with=all&lang2=he",
                     "https://www.sefaria.org/Mishnah_Berakhot.9.5?lang=he&with=all&lang2=he"))
 #####
-#'Now lets get all the text. 
+#'Now lets get all the text. Remember to add Sys.sleep() to imitate human use
 brachos<-lapply(links,function(x) sapply(x, function(y) {Sys.sleep(sample(10, 1) * 0.1)
-                                                        pipeit(y,".highlight .he")}))
-brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[A-z][0-9]","",y)))
+                                                        pipeit(y,".highlight")}))
 
+#'Lets clean it to get the Hebrew text exclusively
+brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[A-z]","",y)))
+brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[0-9]","",y)))
+brachos<-lapply(brachos, function(x) sapply(x, function(y) gsub("\\n.*","",y)))
+brachos<-lapply(brachos, function(x) sapply(x, function(y) trimws(y)))
+
+#'Lets create a list of the Taanaim in the Maseches Brachos
+tannaim<-c("רַבִּי אֱלִיעֶזֶר",
+           "חֲכָמִים",
+           "רַבָּן גַּמְלִיאֵל",
+           "רַבִּי אֱלִיעֶזֶר",
+           "רַבִּי יְהוֹשֻׁעַ",
+           "בֵּית שַׁמַּאי",
+           "בֵית הִלֵּל",
+           "רַבִּי טַרְפוֹן",
+           "",
+           "",
+           "",)
