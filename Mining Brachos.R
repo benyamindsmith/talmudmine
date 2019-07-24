@@ -90,15 +90,53 @@ brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[0-9]","",y)))
 brachos<-lapply(brachos, function(x) sapply(x, function(y) gsub("\\n.*","",y)))
 brachos<-lapply(brachos, function(x) sapply(x, function(y) trimws(y)))
 
-#'Lets create a list of the Taanaim in the Maseches Brachos
+#####
+#'Lets create a list of the Taanaim in the Maseches Brachos (Note: This is complete)
 tannaim<-c("רַבִּי אֱלִיעֶזֶר",
            "חֲכָמִים",
            "רַבָּן גַּמְלִיאֵל",
-           "רַבִּי אֱלִיעֶזֶר",
            "רַבִּי יְהוֹשֻׁעַ",
            "בֵּית שַׁמַּאי",
            "בֵית הִלֵּל",
            "רַבִּי טַרְפוֹן",
-           "",
-           "",
-           "",)
+           "רַבִּי אֶלְעָזָר בֶּן עֲזַרְיָה",
+           "רַבִּי מֵאִיר",
+           "רַבִּי יְהוּדָה",
+           "רַבִּי יוֹסֵי",
+           "רַבָּן שִׁמְעוֹן בֶּן גַּמְלִיאֵל" ,
+           "רַבִּי נְחוּנְיָא בֶּן הַקָּנָה",
+           "רַבִּי עֲקִיבָא",
+           "רַבִּי חֲנִינָא בֶן דּוֹסָא",
+           "רַבִּי יִשְׁמָעֵאל")
+#####
+#'To make this readable in R lets convert taanaim to utf8
+
+tanint<-sapply(tannaim,utf8ToInt)
+
+#'reconvert
+
+tanutf<-lapply(tanint,intToUtf8)
+tanutf<-unlist(unname(tanutf))
+tanutf<-utf8::utf8_normalize(tannaim)
+
+#'Now lets get some matching by using the "grepl" function
+#'
+#'Lets convert the Mishna text from UTF-8 into integers and paste it as one string
+
+brachoscd<-lapply(brachos, function(x) sapply(x, function(y) utf8ToInt(y)))
+brachoscd<-lapply(brachoscd, function(x) sapply(x, function(y) as.character(y)))
+brachoscd<-lapply(brachoscd, function(x) sapply(x, function(y) capture.output(cat(y))))
+
+#'Similarly lets do this to the Taanaim
+
+tancd<-lapply(tanint, function(x) sapply(x, function(y) as.character(y)))
+tancd<-unname(tancd)
+tancd<-lapply(tancd,  function(x) capture.output(cat(x)))
+names(tancd)<-tannaim
+
+#'Now lets get the truth tables
+#'
+
+lapply(brachoscd, function(x) (sapply(x, function(y) grepl(tancd[[2]], y))))
+
+#' Note: string_which() and grepl() are not producing the desired result.
