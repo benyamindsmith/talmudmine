@@ -81,6 +81,7 @@ links<-list(PerekAleph=c("https://www.sefaria.org/Mishnah_Berakhot.1.1?lang=he&w
                     "https://www.sefaria.org/Mishnah_Berakhot.9.5?lang=he&with=all&lang2=he"))
 #####
 #'Now lets get all the text. Remember to add Sys.sleep() to imitate human use
+#' PSA- Please use Sefaria API- this was created before I knew about it 
 brachos<-lapply(links,function(x) sapply(x, function(y) {Sys.sleep(sample(10, 1) * 0.1)
                                                         pipeit(y,".highlight")}))
 
@@ -135,8 +136,67 @@ tancd<-lapply(tancd,  function(x) capture.output(cat(x)))
 names(tancd)<-tannaim
 
 #'Now lets get the truth tables
+#' Note: string_which and grepl are not producing the desired result; 
+#' Thus fuzzzy string matching is required (i.e. "agrepl")
+
+tt<-lapply(tancd,function(z) lapply(brachoscd, function(x) (sapply(x, function(y) agrepl(z, y)))))
+
+#' Now lets flatten the list appropriately
+
+tt<-lapply(tt, function(x) lapply(x, unlist))
+tt<-lapply(tt, unlist)
+#' Lets build a dataframe now: 
+
+dtt<-data.frame(tt)
+colnames<-tannaim
+
+#' This dataframe serves as a truth table for the taanaim and their interactions in Maseches Brachos. 
+#' 
+#' Lets visualize the Tannaim's interactions with one another by using a hierarchical edge graph.
+#'First, we are going to need to create a hierarchical data frame. 
 #'
+#'Lets first get dtt in long form
 
-lapply(brachoscd, function(x) (sapply(x, function(y) grepl(tancd[[2]], y))))
+dttl<-reshape::melt(dtt)
 
-#' Note: string_which() and grepl() are not producing the desired result.
+dttl$mishna<-rep(unname(unlist(links)),16)
+
+dttl<-dttl[which(dttl$value==TRUE),]
+dttl$mishna<-sapply(dttl$mishna,function(x) gsub("[A-z]","",x))
+dttl$mishna<-sapply(dttl$mishna,function(x) gsub("://../.","",x))
+dttl$mishna<-sapply(dttl$mishna,function(x) gsub("?=&=&2=","",x))
+dttl$mishna<-sapply(dttl$mishna,function(x) gsub("\\?","",x))
+
+#'Lets order the dataframe with sql
+library(sqldf)
+library(plyr)
+dttl<-sqldf("SELECT * FROM dttl
+             ORDER BY mishna;")
+dttl$variable<-as.character(dttl$variable)
+tanrp<-unique(dttl$variable)
+
+#'Make the Tannaim look normal
+dttl$variable<-replace(dttl$variable,tanrp %in% dttl$variable, tannaim)
+
+library(data.tree)
+library(networkD3)
+dttl<-data.frame(dttl$mishna,dttl$variable, stringsAsFactors = FALSE)
+
+#' Lets first define the pathstring
+
+dttl$pathString<- paste("משניות ברכות",
+                        dttl$dttl.mishna, 
+                        dttl$dttl.variable,
+                        sep="/")
+
+####THE Hierachical data frame
+hdt<-as.Node(dttl)
+
+#' The network data frame
+hdtl<- ToListExplicit(hdt, unname = TRUE)
+
+#' The visualization
+radialNetwork(hdtl, 
+              linkColour = "burlywood",
+              nodeColour="midnightblue",
+              fontSize = 14)
