@@ -90,7 +90,7 @@ brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[A-z]","",y)))
 brachos<-lapply(brachos,function(x) sapply(x, function(y) gsub("[0-9]","",y)))
 brachos<-lapply(brachos, function(x) sapply(x, function(y) gsub("\\n.*","",y)))
 brachos<-lapply(brachos, function(x) sapply(x, function(y) trimws(y)))
-
+brachos<-lapply(brachos, function(x) sapply(x, function(y) substring(y,3))) #Added this here to remove headings
 #####
 #'Lets create a list of the Taanaim in the Maseches Brachos (Note: This is complete)
 tannaim<-c("רַבִּי אֱלִיעֶזֶר",
